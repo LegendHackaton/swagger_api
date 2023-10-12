@@ -12,7 +12,7 @@ tags:
   - name: Профиль
     description: Включает эндпоинты профиля  
 paths:
-  /registartion:
+  /registration:
     post:
       tags:
        - Авторизация
@@ -91,6 +91,13 @@ paths:
       tags:
        - Проекты
       summary: 'Получает список проектов'
+      parameters:
+        - name: pageId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
       responses:
         '200':
           description: Список актуальных проектов получен
@@ -159,18 +166,48 @@ paths:
           description: 'Передан некорректный запрос'
         '404':
           description: 'Проект с таким ID не найден'
+  /project-info:
+    get:
+      tags:
+        - Проекты
+      summary: 'Получает общую информацию о проекте'
+      parameters:
+      - name: projectId
+        in: query
+        required: true
+        schema:
+          type: integer
+          example: 2
+      responses:
+        '200':
+          description: 'Операция прошла успешно'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: 'Передан некорректный запрос'
+        '404':
+          description: 'Проект с таким ID не найден' 
   /tasks:
     get:
       tags:
         - Задачи
       summary: 'Получает список задач'
+      parameters:
+        - name: projectId
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 2
       responses:
         '200':
-          description: Список актуальных проектов получен
+          description: Список актуальных задач получен
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskList'
+                $ref: '#/components/schemas/Tasks'
         '403':
           description: Что-то пошло не так. Попробуйте снова
   /create/task:
@@ -229,7 +266,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskList'
+                $ref: '#/components/schemas/Tasks'
         '403':
           description: Что-то пошло не так. Попробуйте снова
   /kanban/board:
@@ -243,7 +280,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KanbanBoard'
+                $ref: '#/components/schemas/Tasks'
         '403':
           description: Что-то пошло не так. Попробуйте снова
   /profile:
@@ -251,13 +288,19 @@ paths:
       tags:
         - Профиль
       summary: Предоставляет профиль пользователю
+      parameters:
+        - name: profileId
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Операция прошла успешно
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Profile'
+                $ref: '#/components/schemas/User'
         '403':
           description: Что-то пошло не так. Попробуйте снова
   /edit/profile:
@@ -265,19 +308,13 @@ paths:
       tags:
         - Профиль
       summary: Предоставляет возможность редактировать пользователю профиль
-      parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: Данные успешно обновлены
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Profile'
+                $ref: '#/components/schemas/User'
         '400':
           description: Некорректный запрос
   /logout:
@@ -359,6 +396,12 @@ components:
         issues:
           type: integer
           example: 12
+        timeSpent:
+          type: string
+          example: "2M:0W:0D"
+        timeEnd:
+          type: string
+          example: "2M:0W:0D"
     CreateProject:
       type: object
       properties:
@@ -399,37 +442,10 @@ components:
         - projectId
       type: object
       properties:
-        projectID:
+        projectId:
           description: 'Идентификатор проекта'
           type: integer
           example: 5
-    TaskList:
-      type: object
-      properties:
-        general:
-          $ref: '#/components/schemas/General'
-        tasks:
-          $ref: '#/components/schemas/Tasks'
-    General:
-      type: object
-      properties:
-        title:
-          type: string
-          example: "Adoddle"
-        avatarUrls:
-          type: array
-          items:
-            type: string
-            example: "https://site.ru/image.jpg"
-        statusProject:
-          type: string
-          example: "Ontrack"
-        timeSpent:
-          type: string
-          example: "2M:0W:0D"
-        deadline:
-          type: string
-          example: "2M:0W:0D"
     Tasks:
       type: array
       items:
@@ -468,7 +484,7 @@ components:
         timeAllocated:
           type: string
           example: "00:30:2023"
-        avatar_url:
+        avatarUrl:
           type: string
           example: "https://site.ru/image.jpg"
         priority:
@@ -531,29 +547,14 @@ components:
         - taskId
       type: object
       properties:
-        taskID:
+        taskId:
           description: 'Идентификатор задачи'
           type: integer
           example: 5 
-    KanbanBoard:
+    User:
       type: object
       properties:
-        backlog:
-          type: array
-          items:
-            $ref: '#/components/schemas/Tasks'
-        inProgress:
-          type: array
-          items:
-            $ref: '#/components/schemas/Tasks'
-        completed:
-          type: array
-          items:
-            $ref: '#/components/schemas/Tasks'
-    Profile:
-      type: object
-      properties:
-        profileID:
+        profileId:
           type: integer
           example: 2
         avatarUrl:
